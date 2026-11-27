@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#F6EFE4">
 <!-- Privacy: the page may not contact any server; only its own embedded data and blobs. -->
 <meta http-equiv="Content-Security-Policy" content="connect-src data: blob:; form-action 'none'">
-<title>Pip's Move &amp; Calm · Bubble Pop</title>
+<title>Yumo's Move &amp; Calm · Bubble Pop</title>
 <style>
 :root{
   --cream:#F6EFE4; --sky:#DCE8EF; --sage:#A8C3A0; --sage-d:#7FA37A; --peach:#F2C4A8; --blue:#9DB9D3;
@@ -262,6 +262,14 @@ input[type=range]{width:100%;height:44px;accent-color:var(--sage-d)}
 .toggle.on{background:var(--sage-d)} .toggle.on::after{left:32px}
 .done{width:100%;min-height:58px;border-radius:20px;background:#4E7A49;color:#fff;font-weight:800;font-size:17px;margin-top:6px}
 .note{font-size:12.5px;color:var(--ink-soft);line-height:1.45;margin-top:14px}
+.ver{font-size:12px;color:var(--ink-soft);font-weight:700;text-align:center;margin:10px 0 0}
+.playlog{list-style:none;margin:10px 0 0;padding:0;max-height:28vh;overflow:auto}
+.playlog li{background:#F1ECE3;border-radius:14px;padding:10px 12px;margin:0 0 8px;font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.4}
+.playlog li .when{display:block;color:var(--ink-soft);font-size:12px;font-weight:700;margin-bottom:2px}
+.playlogEmpty{font-size:13.5px;color:var(--ink-soft);font-weight:600;margin:10px 0 0}
+.playlogConfirm{margin-top:10px;padding:12px;background:#F1ECE3;border-radius:16px}
+.playlogConfirm p{margin:0 0 8px;font-weight:700}
+#playLogClear{margin-top:8px}
 .gateQ{font-size:20px;font-weight:800;text-align:center;margin:8px 0 16px}
 .gateGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .gateGrid button{min-height:64px;border-radius:18px;background:#F1ECE3;font-size:22px;font-weight:800}
@@ -319,6 +327,7 @@ body[data-state=play] #pip{width:min(26vw,15vh,138px)}
 body[data-state=end] #pip,body.finishing #pip{left:30%}
 body[data-state=end] #jar,body.finishing #jar{left:79%}
 @media (orientation:portrait){#homeBtn{bottom:max(5%,calc(env(safe-area-inset-bottom) + 12px))}#againBtn{bottom:calc(max(5%,calc(env(safe-area-inset-bottom) + 12px)) + 128px + 36px)}}  /* end screen: Play-again sits above Home with a clear gap (was overlapping in portrait) */
+@media (orientation:portrait){body[data-state=end].camon #againHint{bottom:calc(max(5%,calc(env(safe-area-inset-bottom) + 12px)) + 128px + 36px + min(40vw,24vh,170px) + 32px)}}  /* v6.1: keep the hands-up hint above Play-again (same size as .bigBtn, plus halo gap) */
 @media (orientation:portrait){body[data-state=end] #pip,body.finishing #pip{left:31.5%;width:min(36vw,24vh,200px)}}  /* tweak E: closer arms + bigger hands reached past the left edge in portrait; smaller cheer Pip keeps hands on screen and clear of the jar */
 @media (orientation:landscape) and (max-height:560px){body[data-state=end] #pip,body.finishing #pip{left:30%}body[data-state=end] #jar,body.finishing #jar{left:70%}}
 /* ---- seated one-hand picture hint ---- */
@@ -336,6 +345,66 @@ body.camon #parallax{display:none}
 #parallax .plx{position:absolute;left:0;top:0;will-change:transform}
 #parallax .tile{position:absolute;background-repeat:no-repeat;background-size:100% 100%}
 #parallax .tile.flip{transform:scaleX(-1)}
+
+/* ---- v6: Run to Yumo button on the home screen (second game, smaller than Play) ---- */
+#runBtn{position:fixed;right:5%;bottom:max(4%,calc(env(safe-area-inset-bottom) + 12px));width:min(26vw,15vh,112px);height:min(26vw,15vh,112px);min-width:92px;min-height:92px;border-radius:50%;z-index:6;display:grid;place-items:center;
+  background:radial-gradient(circle at 35% 30%,#FFD08A,#FF9530 58%,#E0681A);box-shadow:0 8px 0 #B9520F,0 14px 24px rgba(120,60,20,.25);transition:transform .15s ease,box-shadow .15s ease}
+#runBtn:active{transform:translateY(5px);box-shadow:0 3px 0 #B9520F,0 6px 12px rgba(120,60,20,.2)}
+#runBtn svg{width:62%;height:62%}
+body.calm #runBtn{background:radial-gradient(circle at 35% 30%,#F8DDBE,#E9B88A 60%,#D49A68);box-shadow:0 8px 0 rgba(150,100,60,.4),0 14px 24px rgba(70,80,106,.15)}
+@media (orientation:landscape) and (max-height:560px){#runBtn{right:3%;bottom:auto;top:50%;transform:translateY(-50%)}#runBtn:active{transform:translateY(-50%) translateY(5px)}}
+/* ---- Run to Yumo screen ---- */
+#runHud{position:fixed;left:3%;right:3%;top:calc(max(14px,env(safe-area-inset-top)) + 72px);z-index:6;display:none;pointer-events:none}
+body[data-state=run] #runHud,body[data-state=runEnd] #runHud{display:block}
+#runTrack{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 4px 10px rgba(70,80,106,.18))}
+#trackFill{transition:stroke-dashoffset 1s cubic-bezier(.3,.8,.3,1)}
+body.calm #trackFill{stroke:#E9C089}
+#runner{transition:transform 1s cubic-bezier(.3,.8,.3,1)}
+#trackStops .disc{fill:#FFFDF9;stroke:#3A2A35;stroke-width:4}
+#trackStops .st{fill:#D9D3C8;transition:fill .6s}
+#trackStops .on .disc{fill:#FFF3C4}
+#trackStops .on .st{fill:#FFC21F}
+body.calm #trackStops .on .st{fill:#F3D98B}
+#runMeter{position:relative;margin:10px auto 0;width:62%;height:16px;border-radius:8px;background:linear-gradient(90deg,#7EC8F5,#FFE08A,#FFB070);box-shadow:inset 0 0 0 3px rgba(58,42,53,.35);display:none}
+body.camon[data-state=run] #runMeter{display:block}
+#runDot{position:absolute;top:50%;left:5%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#FFFDF9;border:4px solid #3A2A35;opacity:0;transition:left .25s linear,opacity .4s}
+.runFlag{position:fixed;bottom:max(14px,calc(env(safe-area-inset-bottom) + 10px));width:min(30vw,19vh,150px);height:min(30vw,19vh,150px);border-radius:30px;z-index:7;display:none;place-items:center;
+  background:rgba(255,253,249,.9);box-shadow:0 0 0 4px rgba(58,42,53,.45),0 8px 20px rgba(70,80,106,.18);transition:background .5s,box-shadow .5s,transform .5s}
+body[data-state=run] .runFlag{display:grid}
+.runFlag svg{width:84%;height:84%}
+.runFlag .flagCloth{fill:#CFC8BC;transition:fill .5s}
+#farFlag{left:4%} #nearFlag{right:4%}
+#farFlag.lit{background:#BFE6FF;box-shadow:0 0 0 6px #38B6FF,0 0 28px 8px rgba(56,182,255,.55)}
+#nearFlag.lit{background:#FFE0BF;box-shadow:0 0 0 6px #FF9530,0 0 28px 8px rgba(255,149,48,.55)}
+#farFlag.lit .flagCloth{fill:#38B6FF} #nearFlag.lit .flagCloth{fill:#FF9530}
+#farFlag.next .flagCloth{fill:#8FD0FA} #nearFlag.next .flagCloth{fill:#FFC58A}
+.runFlag.next{animation:flagNext calc(2.6s*var(--slow)) ease-in-out infinite}
+@keyframes flagNext{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+body.calm .runFlag.lit{box-shadow:0 0 0 5px rgba(58,42,53,.45),0 0 18px 4px rgba(255,255,255,.7)}
+.runFlag .tapFinger{position:absolute;right:-10px;bottom:-12px;width:56px;height:56px;opacity:0;transition:opacity .5s;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M38 12c5 0 9 4 9 9v26l5-1c4 0 7 2 8 5l3-1c4 0 7 2 8 5l3-1c5 0 9 4 9 9v12c0 14-11 25-25 25H51c-8 0-15-4-19-11L18 68c-2-4-1-9 3-11s8-1 11 2l-3-4V21c0-5 4-9 9-9z' fill='%23FFFDF9' stroke='%2346506A' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;animation:tap calc(1.6s*var(--slow)) ease-in-out infinite}
+.runFlag.tapme .tapFinger{opacity:1}
+html body[data-state=run] #pip{top:auto;bottom:max(14px,calc(env(safe-area-inset-bottom) + 10px));left:50%;transform:translateX(-50%);width:min(27vw,17vh,140px);opacity:1}
+html body[data-state=runEnd] #pip{top:calc(max(14px,env(safe-area-inset-top)) + 72px + 26vw);bottom:auto;left:50%;transform:translateX(-50%);width:min(44vw,26vh,220px);opacity:1}
+body[data-state=run] #hint,body[data-state=play] #hint{right:auto;left:50%;bottom:auto;top:38%;transform:translateX(-50%)}  /* v6: framing hint in the middle, clear of the jar */
+@media (orientation:landscape) and (max-height:560px){
+  #runHud{left:14%;right:14%;top:max(8px,env(safe-area-inset-top))}
+  #runMeter{margin-top:4px;height:14px}
+  .runFlag{width:min(18vw,34vh,140px);height:min(18vw,34vh,140px)}
+  html body[data-state=run] #pip{width:min(15vw,30vh,130px)}
+  html body[data-state=runEnd] #pip{top:auto;bottom:4%;left:50%;width:min(22vw,46vh,190px)}
+  body[data-state=run] #hint,body[data-state=play] #hint{top:34%;width:min(22vw,34vh,170px)}
+  html body[data-state=runEnd] #pip{left:78%}
+  #runSetup .card{width:min(760px,100%);padding:16px 22px}
+  #runSetup .setupPic{max-height:62px;margin:2px 0 4px}
+  #runSetup .setupList{font-size:15px;margin-bottom:6px}#runSetup .setupList li{margin:2px 0}
+  #runSetup p.sub{margin-bottom:8px}
+  #runSetup .done,#runSetup .gateCancel{display:inline-block;width:48%;margin:0 1% 0 0;vertical-align:middle}
+}
+.setupPic{width:100%;height:auto;display:block;margin:6px 0 10px}
+.setupList{margin:0 0 12px;padding-left:22px;color:var(--ink);font-size:16px;line-height:1.4}
+.setupList li{margin:6px 0}
+#runSetup .done{margin-top:6px}
 </style>
 </head>
 <body data-state="home" class="view-soft">
@@ -500,6 +569,13 @@ body.camon #parallax{display:none}
     </g>
   </svg>
 </div>
+<button id="runBtn" aria-label="Run to Yumo">
+  <svg viewBox="0 0 100 100" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 82 V22" stroke="#fff" stroke-width="7" fill="none"/>
+    <path d="M27 24 L54 31 L27 40 Z" fill="#fff" stroke="#fff" stroke-width="4"/>
+    <path d="M44 66 H82 M72 56 L82 66 L72 76 M54 56 L44 66 L54 76" fill="none" stroke="#fff" stroke-width="7"/>
+  </svg>
+</button>
 <button id="againBtn" class="bigBtn hidden" aria-label="Play again">
   <svg viewBox="0 0 100 100"><path d="M74 38a28 28 0 1 0 4 22" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/><path d="M80 18 L80 42 L56 42" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg>
 </button>
@@ -512,6 +588,62 @@ body.camon #parallax{display:none}
   <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="3" fill="none" stroke="#46506A" stroke-width="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="#46506A" stroke-width="2"/></svg>
 </button>
 
+
+<!-- v6 prototype: Run to Yumo -->
+<div id="runHud" aria-hidden="true">
+  <svg id="runTrack" viewBox="0 0 1000 210">
+    <path id="trackEdge" d="M70 132 C240 30 390 182 520 100 S800 28 930 110" fill="none" stroke="rgba(58,42,53,.55)" stroke-width="64" stroke-linecap="round"/>
+    <path id="trackBase" d="M70 132 C240 30 390 182 520 100 S800 28 930 110" fill="none" stroke="#FFFDF9" stroke-width="54" stroke-linecap="round"/>
+    <path id="trackFill" d="M70 132 C240 30 390 182 520 100 S800 28 930 110" fill="none" stroke="#FFB02E" stroke-width="34" stroke-linecap="round"/>
+    <g transform="translate(70 132)"><circle r="22" fill="#8FD6A8" stroke="#3A2A35" stroke-width="4"/></g>
+    <g id="trackStops"></g>
+    <g id="runner"><g transform="translate(0 -10) scale(1.6)">
+      <path d="M-22 6 C-22 -12 -12 -22 0 -22 C12 -22 22 -12 22 6 C22 11 18 13 14 13 L-14 13 C-18 13 -22 11 -22 6 Z" fill="#F08A6C" stroke="#3A2A35" stroke-width="3.5"/>
+      <rect x="-15" y="-13" width="30" height="17" rx="7" fill="#24403F"/>
+      <path d="M-10 -2 q3.5 -4.5 7 0 M3 -2 q3.5 -4.5 7 0" fill="none" stroke="#7FF0D8" stroke-width="2.6" stroke-linecap="round"/></g></g>
+  </svg>
+  <div id="runMeter"><i id="runDot"></i></div>
+</div>
+<button id="farFlag" class="runFlag" aria-label="Far spot">
+  <svg viewBox="0 0 120 120" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M6 92 Q60 70 114 92 V114 H6 Z" fill="#9ED89A" stroke="#3A2A35" stroke-width="3"/>
+    <path d="M78 84 V26" stroke="#3A2A35" stroke-width="4"/><path class="flagCloth" d="M80 28 L108 37 L80 47 Z" stroke="#3A2A35" stroke-width="3"/>
+    <circle cx="52" cy="62" r="6" fill="#F2C4A8" stroke="#3A2A35" stroke-width="2.5"/><path d="M46 84 L52 70 L58 84 M44 74 H60" stroke="#3A2A35" stroke-width="3.5" fill="none"/>
+    <path d="M14 40 H34 M28 34 L34 40 L28 46" stroke="#6B7388" stroke-width="4" fill="none"/>
+  </svg>
+  <i class="tapFinger"></i>
+</button>
+<button id="nearFlag" class="runFlag" aria-label="Near spot">
+  <svg viewBox="0 0 120 120" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="76" y="20" width="34" height="62" rx="8" fill="#E9EEF6" stroke="#3A2A35" stroke-width="3.5"/><circle cx="93" cy="28" r="2.6" fill="#3A2A35"/>
+    <circle cx="44" cy="54" r="27" fill="#F2C4A8" stroke="#3A2A35" stroke-width="3.5"/>
+    <circle cx="35" cy="51" r="3.4" fill="#3A2A35"/><circle cx="53" cy="51" r="3.4" fill="#3A2A35"/><path d="M34 63 q10 9 20 0" fill="none" stroke="#3A2A35" stroke-width="3.5"/>
+    <path d="M12 104 Q44 82 76 104" fill="none" stroke="#3A2A35" stroke-width="4"/>
+    <path class="flagCloth" d="M8 10 L30 17 L8 25 Z" stroke="#3A2A35" stroke-width="3"/><path d="M8 8 V40" stroke="#3A2A35" stroke-width="4"/>
+  </svg>
+  <i class="tapFinger"></i>
+</button>
+<div id="runSetup" class="sheet hidden">
+  <div class="card" role="dialog" aria-label="Run to Yumo: grown-ups first">
+    <h2>Run to Yumo · grown-ups first</h2>
+    <svg class="setupPic" viewBox="0 0 320 120" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="10" y="62" width="44" height="48" rx="6" fill="#E9C089" stroke="#3A2A35" stroke-width="3"/>
+      <rect x="20" y="22" width="24" height="40" rx="5" fill="#E9EEF6" stroke="#3A2A35" stroke-width="3"/><path d="M26 62 L32 52 L38 62" fill="none" stroke="#3A2A35" stroke-width="3"/>
+      <path d="M78 92 H232 M90 82 L78 92 L90 102 M220 82 L232 92 L220 102" fill="none" stroke="#7FA37A" stroke-width="6"/>
+      <circle cx="154" cy="46" r="10" fill="#F2C4A8" stroke="#3A2A35" stroke-width="3"/><path d="M154 56 V74 M142 64 H166 M154 74 L146 86 M154 74 L162 86" fill="none" stroke="#3A2A35" stroke-width="4"/>
+      <circle cx="282" cy="30" r="11" fill="#F2C4A8" stroke="#3A2A35" stroke-width="3"/><path d="M282 41 V80 M268 56 H296 M282 80 L272 108 M282 80 L292 108" fill="none" stroke="#3A2A35" stroke-width="4.5"/>
+      <path d="M262 22 q-8 -6 -14 0" fill="none" stroke="#6B7388" stroke-width="3"/>
+    </svg>
+    <ol class="setupList">
+      <li><b>Prop the phone firmly</b> at your child's height, screen facing the room.</li>
+      <li><b>Clear a safe space</b> of about 3 big steps (2 to 3 m). No rugs, toys or sharp corners.</li>
+      <li><b>A grown-up watches</b> the whole time.</li>
+    </ol>
+    <p class="sub">Your child runs to the far spot, then back near the phone. Each trip is one lap. The camera only judges body size, on this phone. Nothing is recorded or sent. If the camera can't see, tap the flags instead.</p>
+    <button class="done" id="runStart">Start</button>
+    <button class="gateCancel" id="runBack">Back</button>
+  </div>
+</div>
 <div id="gate" class="sheet hidden">
   <div class="card">
     <h2>Grown-ups only</h2>
@@ -531,15 +663,30 @@ body.camon #parallax{display:none}
     <div class="row"><label>How many bubbles</label><div class="seg" data-key="amount"><button data-v="few">Few</button><button data-v="some">Some</button><button data-v="many">Many</button></div></div>
     <div class="row"><label>Play time</label><div class="seg" data-key="session"><button data-v="1">1 min</button><button data-v="2">2 min</button><button data-v="3">3 min</button><button data-v="5">5 min</button></div></div>
     <div class="row"><label>Play position</label><div class="seg" data-key="seat"><button data-v="auto">Auto</button><button data-v="standing">Standing</button><button data-v="seated">Seated, one hand</button></div><small class="hint">Seated: bubbles stay near the shoulders, within reach of one hand. Good at a table. Auto switches to seated when only the upper body is in view.</small></div>
+    <div class="row"><label>Run to Yumo: laps</label><div class="seg" data-key="runLaps"><button data-v="5">5</button><button data-v="6">6</button><button data-v="8">8</button></div></div>
+    <div class="row"><label>Run to Yumo: running space</label><div class="seg" data-key="runSpace"><button data-v="small">Small room</button><button data-v="medium">Medium</button><button data-v="big">Big room</button></div><small class="hint">Small room: the far spot is closer to the phone. Big room: hallway or garden.</small></div>
     <div class="row"><label>Camera picture</label><div class="seg" data-key="view"><button data-v="clear">Clear</button><button data-v="soft">Soft</button><button data-v="hidden">Hidden</button></div></div>
-    <div class="row sw"><div><b>Calm mode</b><small>Off = Colourful (bright colours, lively Pip, bigger pops). On = soft colours, slower motion, fewer sparkles, quieter sounds.</small></div><button class="toggle" id="calmT" aria-label="Calm mode"></button></div>
-    <div class="row sw"><div><b>Costume rewards</b><small>Filling Pip's jar earns a costume (bubble helmet, cape, sparkly hands, star crown) that follows your child on the camera. Pip wears it too.</small></div><button class="toggle" id="costumeT" aria-label="Costume rewards"></button></div>
-    <div class="row sw"><div><b>Voice guidance</b><small>Pip says short, calm instructions out loud using the phone's built-in voice.</small></div><button class="toggle" id="voiceT" aria-label="Voice guidance"></button></div>
+    <div class="row sw"><div><b>Calm mode</b><small>Off = Colourful (bright colours, lively Yumo, bigger pops). On = soft colours, slower motion, fewer sparkles, quieter sounds.</small></div><button class="toggle" id="calmT" aria-label="Calm mode"></button></div>
+    <div class="row sw"><div><b>Costume rewards</b><small>Filling Yumo's jar earns a costume (bubble helmet, cape, sparkly hands, star crown) that follows your child on the camera. Yumo wears it too.</small></div><button class="toggle" id="costumeT" aria-label="Costume rewards"></button></div>
+    <div class="row sw"><div><b>Voice guidance</b><small>Yumo says short, calm instructions out loud using the phone's built-in voice.</small></div><button class="toggle" id="voiceT" aria-label="Voice guidance"></button></div>
     <div class="row sw"><div><b>Special bubbles</b><small>A bigger, slower bubble after a few pops, with a short warning first. Turn this off for a calmer game.</small></div><button class="toggle" id="specialsT" aria-label="Special bubbles"></button></div>
     <div class="row sw"><div><b>Test view</b><small>Shows tracking dots, light level and speed on screen. For grown-ups checking setup.</small></div><button class="toggle" id="testT" aria-label="Test view"></button></div>
     <div class="row sw"><div><b>Use the camera</b><small>Off = tap the bubbles with a finger instead.</small></div><button class="toggle" id="camT" aria-label="Use the camera"></button></div>
+    <div class="row" id="playLogBlock">
+      <label>Play log</label>
+      <small class="hint">Kept on this phone only. The last 50 sessions. Nothing is sent.</small>
+      <ul class="playlog" id="playLogList"></ul>
+      <p class="playlogEmpty" id="playLogEmpty">No sessions yet.</p>
+      <button type="button" class="gateCancel" id="playLogClear">Clear log</button>
+      <div id="playLogConfirm" class="playlogConfirm hidden">
+        <p>Clear the play log on this phone?</p>
+        <button type="button" class="done" id="playLogConfirmYes">Clear</button>
+        <button type="button" class="gateCancel" id="playLogConfirmNo">Cancel</button>
+      </div>
+    </div>
     <button class="done" id="settingsDone">Done</button>
     <p class="note">Privacy: the camera picture is analysed only inside this phone to find hands and head. Nothing is recorded, saved or sent anywhere. The camera stays on until you go Home, so both raised hands can start another go, and then it turns off.</p>
+    <p class="ver" id="appVer">v6.1, 27 Nov 2026</p>
   </div>
 </div>
 
@@ -9714,13 +9861,42 @@ const qs=new URLSearchParams(location.search);
 const FAKE_POSE=qs.get('fakePose')==='1'; // test-only: poses come from __pip.setPose instead of the camera model
 
 /* ---------- Settings (localStorage) ---------- */
-const DEFAULTS={volume:60,speed:'slow',amount:'some',session:'2',view:'soft',calm:false,useCamera:true,testView:false,voice:true,specials:true,costumes:true,seat:'auto'};
+const DEFAULTS={volume:60,speed:'slow',amount:'some',session:'3',view:'soft',calm:false,useCamera:true,testView:false,voice:true,specials:true,costumes:true,seat:'auto',runLaps:'6',runSpace:'medium'};
 let S=Object.assign({},DEFAULTS);
 try{Object.assign(S,JSON.parse(localStorage.getItem('pipBubbleSettings')||'{}'))}catch(e){}
+// v6: levels are now about 2-3 minutes, so the old 2-minute default moves to 3 once (a parent's other choices are kept).
+if(!S.v6){if(S.session==='2')S.session='3';S.v6=1;try{if(localStorage.getItem('pipBubbleSettings')!==null)localStorage.setItem('pipBubbleSettings',JSON.stringify(S))}catch(e){}}
 if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches&&localStorage.getItem('pipBubbleSettings')===null){S.calm=true;S.specials=false}
+
+/* ---------- v6.1: on-device play log (localStorage only; never uploaded) + version label ---------- */
+const APP_VERSION='v6.1, 27 Nov 2026';
+const PLAYLOG_KEY='pipPlayLog', PLAYLOG_MAX=50;
+let playLogOpen=null;
+function loadPlayLog(){try{const a=JSON.parse(localStorage.getItem(PLAYLOG_KEY)||'[]');if(!Array.isArray(a))return [];const t=a.slice(-PLAYLOG_MAX);if(t.length!==a.length){try{localStorage.setItem(PLAYLOG_KEY,JSON.stringify(t))}catch(e){}}return t}catch(e){return []}}
+function savePlayLog(a){try{localStorage.setItem(PLAYLOG_KEY,JSON.stringify(a.slice(-PLAYLOG_MAX)))}catch(e){}}
+function beginPlayLog(game){playLogOpen={game:game,startedAt:Date.now(),t0:performance.now(),mode:mode}}
+function endPlayLog(info){if(!playLogOpen)return;const sec=Math.max(0,Math.round(info&&info.seconds!=null?info.seconds:(performance.now()-playLogOpen.t0)/1000));
+  const e={at:playLogOpen.startedAt,game:playLogOpen.game,seconds:sec,pops:info&&info.pops||0,laps:info&&info.laps||0,finished:!!(info&&info.finished),mode:playLogOpen.mode||mode};
+  const a=loadPlayLog();a.push(e);savePlayLog(a);playLogOpen=null;if(typeof renderPlayLog==='function')renderPlayLog()}
+function formatWhen(ms){const d=new Date(ms),mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const p=n=>n<10?'0'+n:''+n;return d.getDate()+' '+mo[d.getMonth()]+' '+d.getFullYear()+', '+p(d.getHours())+':'+p(d.getMinutes())}
+function formatDur(s){s=Math.max(0,Math.round(s||0));if(s<60)return s+' s';const m=Math.floor(s/60),r=s%60;return r?m+' min '+r+' s':m+' min'}
+function renderPlayLog(){const list=$('playLogList'),empty=$('playLogEmpty'),clear=$('playLogClear'),rows=loadPlayLog().slice().reverse();
+  if(!list)return;list.innerHTML='';
+  rows.forEach(e=>{const li=document.createElement('li');const kind=e.game==='Run to Yumo'?(e.laps+' lap'+(e.laps===1?'':'s')):(e.pops+' pop'+(e.pops===1?'':'s'));
+    const fin=e.finished?'finished':'not finished';const how=e.mode==='tap'?'tap':'camera';
+    li.innerHTML='<span class="when">'+formatWhen(e.at)+'</span>'+e.game+' · '+formatDur(e.seconds)+' · '+kind+' · '+fin+' · '+how;list.appendChild(li)});
+  if(empty)empty.classList.toggle('hidden',rows.length>0);if(clear)clear.classList.toggle('hidden',rows.length===0);
+  const conf=$('playLogConfirm');if(conf)conf.classList.add('hidden')}
+function bindPlayLogUi(){const show=on=>{const c=$('playLogConfirm');if(c)c.classList.toggle('hidden',!on)};
+  const clr=$('playLogClear');if(clr)clr.onclick=()=>show(true);
+  const no=$('playLogConfirmNo');if(no)no.onclick=()=>show(false);
+  const yes=$('playLogConfirmYes');if(yes)yes.onclick=()=>{savePlayLog([]);renderPlayLog()};
+  const ver=$('appVer');if(ver&&APP_VERSION.indexOf('__APP_VERSION__')===-1)ver.textContent=APP_VERSION;
+  renderPlayLog()}
 function saveS(){try{localStorage.setItem('pipBubbleSettings',JSON.stringify(S))}catch(e){}applyS()}
 function applyS(){body.classList.toggle('calm',!!S.calm);body.classList.remove('view-clear','view-soft','view-hidden');body.classList.add('view-'+S.view);if(master)master.gain.value=vol();if(lpf)lpf.frequency.value=S.calm?1700:2600;syncCostume();if(typeof BreathRing!=='undefined')(S.calm?BreathRing.show('calm'):BreathRing.hide('calm'));if(typeof updateFace==='function')try{updateFace()}catch(e){}}
-const SPEED={gentle:.65,slow:1,lively:1.45}, AMOUNT={few:3,some:5,many:7};
+const SPEED={gentle:.65,slow:1,lively:1.45}, AMOUNT={few:3,some:5,many:7}, AMOUNT_REACH={few:2,some:3,many:4};
+const SPAWN_GAP=parseFloat(qs.get('spawnGap'))||3.4; // seconds between new bubbles (plus up to 1 s); with ~36 pops a level lasts about 2-3 minutes
 function sessionSeconds(){const t=parseFloat(qs.get('session'));return t>0?t:parseFloat(S.session)*60}
 
 /* ---------- Audio: soft synthesized chimes ---------- */
@@ -9832,7 +10008,8 @@ function detect(now){
   personSeenAt=now;
   for(const k in IDS){const lm=lms[IDS[k]];if(!lm)continue;const p=toScreen(lm);const vis=lm.visibility==null?1:lm.visibility;
     const inView=p.x>W*.02&&p.x<W*.98&&p.y>H*.02&&p.y<H*.98;const v=inView?vis:0;
-    if(!P[k]||P[k].v<VIS*.6)P[k]={x:p.x,y:p.y,v:v,good:v>VIS?now:0};else{P[k].x+=(p.x-P[k].x)*SMOOTH;P[k].y+=(p.y-P[k].y)*SMOOTH;P[k].v=v;if(v>VIS)P[k].good=now}}}
+    if(!P[k]||P[k].v<VIS*.6)P[k]={x:p.x,y:p.y,v:v,good:v>VIS?now:0};else{P[k].x+=(p.x-P[k].x)*SMOOTH;P[k].y+=(p.y-P[k].y)*SMOOTH;P[k].v=v;if(v>VIS)P[k].good=now}}
+  trackHands(now);if(state==='run')runObserve(runMeasure(lastRaw,cam.videoWidth||640,cam.videoHeight||480),now)}
 // v2: lower confidence cutoff (was .55) so dim rooms and small bodies still count.
 const VIS=parseFloat(qs.get('vis'))||.4, SMOOTH=.75, HOLD_MS=280;
 const ok=k=>P[k]&&P[k].v>VIS;
@@ -9845,6 +10022,26 @@ function bodyBox(){if(!(ok('lSh')&&ok('rSh')))return null;const sw=Math.abs(P.lS
   const top=ok('nose')?P.nose.y-sw*.9:Math.min(P.lSh.y,P.rSh.y)-sw*1.4;const bot=(ok('lHip')&&ok('rHip'))?(P.lHip.y+P.rHip.y)/2:Math.max(P.lSh.y,P.rSh.y)+sw*1.6;
   return {cx,sw,left:cx-sw*2.3,right:cx+sw*2.3,top,bot}}
 
+/* ---------- v6: hand speed. A pop needs a HAND (wrist + index + pinky) that is really moving; a still body or head never pops ---------- */
+const VEL_SW=parseFloat(qs.get('velSw'))||1.5, VEL_MIN=parseFloat(qs.get('velMin'))||110, VEL_WIN=280, HIT_PAD=parseFloat(qs.get('hitPad'))||.12;
+const HV={l:[],r:[]};
+function palm(s){const w=s+'Wr',i=s+'In',pk=s+'Pi';if(!ok(w))return null;let x=P[w].x,y=P[w].y,n=1;if(ok(i)){x+=P[i].x;y+=P[i].y;n++}if(ok(pk)){x+=P[pk].x;y+=P[pk].y;n++}return {x:x/n,y:y/n}}
+// called once per pose detection (~20 a second), never per frame
+function trackHands(now){for(const s of ['l','r']){const p=palm(s),h=HV[s];if(!p){h.length=0;continue}
+  const lt=h[h.length-1];if(lt&&Math.hypot(p.x-lt.x,p.y-lt.y)/Math.max(.02,(now-lt.t)/1000)>Math.min(W,H)*5)h.length=0; // faster than ~5 screen-widths a second = a tracking jump, not a real move
+  h.push({t:now,x:p.x,y:p.y});while(h.length&&now-h[0].t>600)h.shift()}}
+// speed over the last ~0.28 s (px/s): long enough to average out landmark jitter, short enough to feel instant
+function handSpeed(s,now){const h=HV[s];if(h.length<2)return 0;const a=h[h.length-1];if(now-a.t>300)return 0;
+  let b=h[0];for(let i=h.length-2;i>=0;i--){b=h[i];if(a.t-b.t>=VEL_WIN)break}
+  const dt=(a.t-b.t)/1000;return dt>=.08?Math.hypot(a.x-b.x,a.y-b.y)/dt:0}
+// threshold scales with body size in the picture (a near child's jitter is bigger in pixels)
+function velThresh(){const sw=(ok('lSh')&&ok('rSh'))?Math.hypot(P.lSh.x-P.rSh.x,P.lSh.y-P.rSh.y):Math.min(W,H)*.2;return Math.max(VEL_MIN,sw*VEL_SW)}
+let handInfo={l:0,r:0,thr:0}, popLog=[], crossPops=0;
+function movingHands(now){const out=[],thr=velThresh();handInfo={l:0,r:0,thr:Math.round(thr)};
+  for(const s of ['l','r']){const p=palm(s);if(!p)continue;const sp=handSpeed(s,now);handInfo[s]=Math.round(sp);const moving=sp>thr;
+    out.push({x:p.x,y:p.y,r:0,side:s,moving,speed:sp});const i=s+'In';if(ok(i))out.push({x:P[i].x,y:P[i].y,r:0,tip:true,side:s,moving,speed:sp})}
+  return out}
+
 /* ---------- Bubbles and particles ---------- */
 /* v5: two palettes. Colourful (default) = bright, varied; Calm = the soft v4 pastels. */
 const HUES_CALM=[[169,196,220],[201,184,218],[168,205,176],[242,196,168],[243,217,139]];
@@ -9854,8 +10051,8 @@ const RAINBOW_BRIGHT=[[255,94,136],[255,149,48],[255,206,38],[52,199,108],[38,16
 const hues=()=>S.calm?HUES_CALM:HUES_BRIGHT, rainbow=()=>S.calm?RAINBOW_CALM:RAINBOW_BRIGHT;
 const MAX_PARTS=()=>S.calm?60:160;
 let bubbles=[], parts=[], rings=[], sparkles=[], bursts=[], attract=[], attractTimer=0, spawnTimer=0, lastPopAt=0, popsThisRound=0;
-const JAR_GOAL=Math.max(1,parseFloat(qs.get('jarGoal'))||12);
-const SPECIAL_EVERY=Math.max(1,parseFloat(qs.get('specialEvery'))||4);
+const JAR_GOAL=Math.max(1,parseFloat(qs.get('jarGoal'))||40); // v6: was 12 (finished in ~25 s); now about 2-3 minutes of reaching
+const SPECIAL_EVERY=Math.max(1,parseFloat(qs.get('specialEvery'))||8);
 const SPECIAL_CUE=parseFloat(qs.get('specialCue'))||1.5;
 const SPECIAL_FILL=Math.max(1,parseFloat(qs.get('specialFill'))||2);
 let jarFill=0, normalPops=0, specialsSpawned=0, specialCue=0, specialFrom=null, danceTimer=0, replayHold=0, endAt=0, finishWhy='';
@@ -9873,7 +10070,9 @@ function keepOuts(pad){const out=[];for(const sel of ['#pip svg','#jar','#grownB
     const r=e.getBoundingClientRect();if(r.width<2)continue;out.push({left:r.left-pad,top:r.top-pad,right:r.right+pad,bottom:r.bottom+pad,sel})}return out}
 let koCache=[],koAt=0;function refreshKO(now){if(now-koAt>250){koAt=now;koCache=state==='play'?keepOuts(4).filter(r=>r.sel!=='#grownBtn'):[]}}
 function circleHitsRect(x,y,R,r){const nx=Math.max(r.left,Math.min(x,r.right)),ny=Math.max(r.top,Math.min(y,r.bottom));return Math.hypot(x-nx,y-ny)<R}
-function setPose(o){const now=performance.now();for(const k in o){const q=o[k];if(!q){delete P[k];continue}const v=q.v==null?1:q.v;P[k]={x:q.x,y:q.y,v,good:v>VIS?now:0}}personSeenAt=now}
+function setPose(o){const now=performance.now();for(const k in o){const q=o[k];if(!q){delete P[k];continue}const v=q.v==null?1:q.v;P[k]={x:q.x,y:q.y,v,good:v>VIS?now:0}}personSeenAt=now;trackHands(now)}
+// test hook for the running game: raw 0..1 landmarks (MediaPipe order) as if they came from the camera
+function setRaw(arr,vw,vh){const now=performance.now();lastRaw=arr;if(arr){personSeenAt=now;if(state==='run')runObserve(runMeasure(arr,vw||640,vh||480),now)}}
 /* ---------- Gentle star rewards for trying (never taken away, ~2 s, no fail text) ---------- */
 const EFFORT_GAP=(parseFloat(qs.get('effortGap'))||7)*1000, ACTIVE_SECS=parseFloat(qs.get('activeSecs'))||15;
 let effortStars=0, lastEffortAt=-1e9, activeT=0, prevHand={}, efforts=[], lastMoveAt=-1e9;
@@ -9944,6 +10143,7 @@ function spawn(target){const R=radius()*(S.calm?(0.85+Math.random()*.3):(0.8+Mat
       for(const o of bubbles)if(!o.popped)d=Math.min(d,Math.hypot(o.x-cx,o.y-cy)-o.R-R2);if(d>bestD){bestD=d;best=[cx,cy]}if(d>R2*.4)break}
     const sp=SPEED[S.speed]*(S.calm?.8:1)*.45,hs=hues();
     bubbles.push({x:best[0],y:best[1],R:R2,hue:hs[Math.floor(Math.random()*hs.length)],vy:-(H*.035+Math.random()*H*.02)*sp,ph:Math.random()*6.28,wob:(8+Math.random()*10),age:0,popped:false,phx:best[0],face:Math.random()<(S.calm?.2:.4),seat:true,topY:Math.min(z.top+R2,sy),hold:0,zone:z});return}
+  if(!target&&mode==='camera'){spawnReach(R);return} // v6: standing play: targets where the child has to reach
   const bb=mode==='camera'?bodyBox():null;let x,y;
   if(target){x=target.x+(Math.random()-.5)*R;y=target.y+R*2.2}
   else{let best=null,bestD=-Infinity;
@@ -9956,6 +10156,32 @@ function spawn(target){const R=radius()*(S.calm?(0.85+Math.random()*.3):(0.8+Mat
   x=Math.max(R,Math.min(W-R,x));y=Math.min(H+R,y);
   const sp=SPEED[S.speed]*(S.calm?.8:1);
   const hs=hues();bubbles.push({x,y,R,hue:hs[Math.floor(Math.random()*hs.length)],vy:-(H*.035+Math.random()*H*.02)*sp,ph:Math.random()*6.28,wob:(10+Math.random()*16),age:0,popped:false,phx:x,face:Math.random()<(S.calm?.2:.4)})}
+/* ---------- v6: reach targets. Each bubble sits where the child must reach: high above the head, out wide, or across the middle ---------- */
+const REACH_SEQ=['high','wide','cross','highSide','wide','high','cross','wide'];
+const REACH_LIFE=parseFloat(qs.get('reachLife'))||10;
+let reachIdx=0, reachSide=1, lastPopHand=null, reachLog=[];
+function reachAnchor(){const bb=bodyBox();if(bb)return {cx:bb.cx,shY:(P.lSh.y+P.rSh.y)/2,sw:Math.max(bb.sw,Math.min(W,H)*.08),body:true};
+  return {cx:W/2,shY:H*.52,sw:Math.min(W,H)*.2,body:false}}
+// sw = shoulder width in px. A young child's arm is about 1.8-2 shoulder widths long, so these spots need a full stretch but stay reachable.
+function reachSpot(kind,A,side){const s=A.sw,r=Math.random;
+  if(kind==='high')return {x:A.cx+side*s*(.1+r()*.5),y:A.shY-s*(1.75+r()*.35)};
+  if(kind==='highSide')return {x:A.cx+side*s*(1.0+r()*.4),y:A.shY-s*(1.45+r()*.3)};
+  if(kind==='wide')return {x:A.cx+side*s*(2.0+r()*.45),y:A.shY-s*(.5-r()*.6)};
+  return {x:A.cx+side*s*(.75+r()*.45),y:A.shY+s*(.05+r()*.45)}} // cross: chest height, just past the middle
+function spawnReach(R){const A=reachAnchor(),ko=keepOuts(R*.25);let kind=REACH_SEQ[reachIdx%REACH_SEQ.length];reachIdx++;
+  let side,crossFor=null;
+  // screen is a mirror: the child's left hand shows on the left. A cross bubble goes to the far side of the hand that just popped.
+  if(kind==='cross'){const hand=lastPopHand||(reachSide>0?'r':'l');side=hand==='l'?1:-1;crossFor=hand}
+  else{reachSide=-reachSide;side=reachSide}
+  let best=null,bestD=-1e9;const alt=['high','highSide','wide'];
+  for(let k=0;k<14;k++){const kk=k<6?kind:alt[k%3],sd=k<6?side:(k%2?1:-1),p=reachSpot(kk,A,sd);
+    const x=Math.max(R+6,Math.min(W-R-6,p.x)),y=Math.max(R+8,Math.min(H-R-6,p.y));let d=1e9;
+    if(ko.some(o=>circleHitsRect(x,y,R,o)))d=-1e6+k;
+    for(const o of bubbles)if(!o.popped)d=Math.min(d,Math.hypot(o.x-x,o.y-y)-o.R-R);
+    if(d>bestD){bestD=d;best={x,y,kind:kk,crossFor:kk==='cross'?crossFor:null}}if(d>R*.3)break}
+  const hs=hues();
+  bubbles.push({x:best.x,y:best.y,R,hue:hs[Math.floor(Math.random()*hs.length)],vy:0,ph:Math.random()*6.28,wob:R*.12,age:0,popped:false,phx:best.x,baseY:best.y,face:Math.random()<(S.calm?.2:.4),reach:true,kind:best.kind,crossFor:best.crossFor,life:REACH_LIFE*(S.calm?1.2:1)});
+  reachLog.push({kind:best.kind,x:Math.round(best.x),y:Math.round(best.y),R:Math.round(R),cx:Math.round(A.cx),shY:Math.round(A.shY),sw:Math.round(A.sw),body:A.body});if(reachLog.length>80)reachLog.shift()}
 function popBubble(b){b.popped=true;popsThisRound++;lastPopAt=performance.now();if(state==='play')lastRealPop=lastPopAt;
   const special=!!b.special;if(special)softSpecialPopSound();else popSound();
   burstFx(b,special);pipReact();
@@ -9984,7 +10210,7 @@ function currentFace(){if(faceForce.wink)return 'wink';if(faceForce.surprised)re
   if(faceForce.calm||S.calm)return 'calm';return 'default'}
 function updateFace(){const f=currentFace();if(pip.dataset.face!==f)pip.dataset.face=f}
 new MutationObserver(updateFace).observe(pip,{attributes:true,attributeFilter:['class']});
-function pipReact(){if(!(state==='play'||state==='home'))return;pipReacts++;
+function pipReact(){if(!(state==='play'||state==='home'||state==='run'))return;pipReacts++;
   pip.classList.remove('pop-hop');void pip.getBoundingClientRect();pip.classList.add('pop-hop','pop-happy');
   clearTimeout(hopTimer);hopTimer=setTimeout(()=>pip.classList.remove('pop-hop'),S.calm?780:560);
   clearTimeout(happyTimer);happyTimer=setTimeout(()=>pip.classList.remove('pop-happy'),900)}
@@ -9997,7 +10223,7 @@ function seedAttract(){attract=[];const n=S.calm?2:5,Z=safeZones();for(let i=0;i
 /* v5.1: safe zones around the grown-up lock and the Play button. Drifting bubbles flow around them (never over them),
    and a tap inside a zone never pops a bubble, so the lock and Play always get their own taps. */
 const ZONE_PAD=22;
-function safeZones(){const out=[];for(const id of ['grownBtn','playBtn']){const el=$(id);if(!el||el.classList.contains('hidden'))continue;
+function safeZones(){const out=[];for(const id of ['grownBtn','playBtn','runBtn']){const el=$(id);if(!el||el.classList.contains('hidden'))continue;
     const r=el.getBoundingClientRect();if(!r.width)continue;out.push({id,x:r.left+r.width/2,y:r.top+r.height/2,r:Math.max(r.width,r.height)/2+ZONE_PAD})}
   return out}
 function inZone(x,y,Z){return (Z||safeZones()).some(z=>Math.hypot(x-z.x,y-z.y)<z.r)}
@@ -10200,7 +10426,7 @@ function drawPersonDots(){ctx.save();for(const k of ['nose','lSh','rSh']){if(!ok
 
 /* ---------- v2b: hidden test view (parent setting, off by default) ---------- */
 let testTxtAt=0;
-function testView(now){const on=!!S.testView&&mode==='camera'&&(state==='calib'||state==='demo'||state==='play'||state==='end');const tp=$('testPanel');
+function testView(now){const on=!!S.testView&&mode==='camera'&&(state==='calib'||state==='demo'||state==='play'||state==='end'||state==='run');const tp=$('testPanel');
   tp.classList.toggle('hidden',!on);if(!on)return;
   const pts=[['nose','head'],['lSh','L shoulder'],['rSh','R shoulder'],['lWr','L hand'],['rWr','R hand']];
   ctx.save();ctx.font='600 11px ui-monospace,Menlo,monospace';ctx.textBaseline='middle';
@@ -10210,16 +10436,16 @@ function testView(now){const on=!!S.testView&&mode==='camera'&&(state==='calib'|
     ctx.fillStyle='rgba(40,46,62,.62)';ctx.fillRect(lx-3,q.y-8,w+6,16);ctx.fillStyle='#fff';ctx.fillText(tx,lx,q.y)}
   ctx.restore();
   if(now-testTxtAt>250){testTxtAt=now;const f=x=>P[x]?P[x].v.toFixed(2):'--';
-    tp.textContent=`TEST VIEW\nlight ${lightLevel<0?'--':Math.round(lightLevel)} (low < ${LIGHT_LOW})${lightOn?' DARK':''}\ndetect ${detTimes.length} fps · ${delegate}\nhead ${f('nose')}  sh ${f('lSh')}/${f('rSh')}\nhands ${f('lWr')}/${f('rWr')}  cut ${VIS}\nclose sh ${Math.round(closeInfo.sh*100)}% face ${Math.round(closeInfo.face*100)}% (>${Math.round(TOO_CLOSE_SH*100)}/${Math.round(TOO_CLOSE_FACE*100)})\nmove ${devMotionSeen?'sensor':'picture'} ${(devMotionSeen?phoneMoving:frameMoving)?'MOVING':'still'} ${Math.round(motionFrac*100)}%\nvoice ${!S.voice?'off':(V.voice?V.voice.name:'none')}${V.busy?' (speaking)':''}\nsaid: ${V.lastText||'-'}\nframe ${FT.length?(FT.reduce((a,b)=>a+b,0)/FT.length).toFixed(1):'--'} ms · costume ${wearing()||'none'}\njar ${jarFill}/${JAR_GOAL}${specialCue>0?'  special cue':(bubbles.some(b=>b.special&&!b.popped)?'  special':'')}\nscreen ${W}x${H} cam ${cam.videoWidth}x${cam.videoHeight}`}}
+    tp.textContent=`TEST VIEW\nlight ${lightLevel<0?'--':Math.round(lightLevel)} (low < ${LIGHT_LOW})${lightOn?' DARK':''}\ndetect ${detTimes.length} fps · ${delegate}\nhead ${f('nose')}  sh ${f('lSh')}/${f('rSh')}\nhands ${f('lWr')}/${f('rWr')}  cut ${VIS}\nclose sh ${Math.round(closeInfo.sh*100)}% face ${Math.round(closeInfo.face*100)}% (>${Math.round(TOO_CLOSE_SH*100)}/${Math.round(TOO_CLOSE_FACE*100)})\nmove ${devMotionSeen?'sensor':'picture'} ${(devMotionSeen?phoneMoving:frameMoving)?'MOVING':'still'} ${Math.round(motionFrac*100)}%\nvoice ${!S.voice?'off':(V.voice?V.voice.name:'none')}${V.busy?' (speaking)':''}\nsaid: ${V.lastText||'-'}\nframe ${FT.length?(FT.reduce((a,b)=>a+b,0)/FT.length).toFixed(1):'--'} ms · costume ${wearing()||'none'}\njar ${jarFill}/${JAR_GOAL}${specialCue>0?'  special cue':(bubbles.some(b=>b.special&&!b.popped)?'  special':'')}\nscreen ${W}x${H} cam ${cam.videoWidth}x${cam.videoHeight}\nhand speed L ${handInfo.l} R ${handInfo.r} (pop > ${handInfo.thr} px/s)${state==='run'?`\nrun size ${R6.s.toFixed(3)} ${R6.src} far<${runTh().far} near>${runTh().near}\nrun target ${R6.target} lap ${R6.lap}/${R6.laps}`:''}`}}
 
 /* ---------- v3: voice guidance (phone's built-in voice, offline; fails silently if missing) ---------- */
 // All spoken lines in one place. Short, literal, positive, one instruction each.
 const LINES={
   start:   "Put the phone down, then step back.",   // calibration starts
-  findMe:  "Stand where Pip can see you.",          // calibration: nobody seen yet after 7 s
+  findMe:  "Stand where Yumo can see you.",          // calibration: nobody seen yet after 7 s
   tooClose:"Step back a little.",                   // shoulders or face too big in the picture for 1.5 s
   putDown: "Put the phone down, please.",           // phone moving / picked up for about 1.5 s
-  gone:    "Where are you? Come back to Pip.",      // nobody visible for 3 s (after being seen)
+  gone:    "Where are you? Come back to Yumo.",      // nobody visible for 3 s (after being seen)
   seen:    "Great! I can see you.",                 // calibration done
   hands:   "Use your hands to pop the bubbles.",    // Pip demo
   handsSeated:"Reach out with one hand to pop the bubbles.", // Pip demo, seated mode
@@ -10227,8 +10453,12 @@ const LINES={
   dark:    "It's a bit dark. Can we turn on a light?", // with the lamp hint
   reach:   "Reach up high!",                         // playing, visible, no pops for 10 s
   bigOne:  "Here comes a big one!",                  // special bubble is about to appear
-  jarFull: "You filled Pip's jar! You did it!",      // jar goal reached
-  bye:     "You did it!"                             // parent time cap ends before the jar is full
+  jarFull: "You filled Yumo's jar! You did it!",      // jar goal reached
+  bye:     "You did it!",                            // parent time cap ends before the jar is full
+  runFar:  "Run to the far spot!",                   // Run to Yumo: go far
+  runNear: "Now run back to Yumo!",                  // Run to Yumo: far spot reached
+  runLap:  "One lap! Great running!",                // Run to Yumo: lap done
+  runDone: "You did it! All the laps!"               // Run to Yumo: round done
 };
 const CORRECTIVE={findMe:1,tooClose:1,putDown:1,gone:1,dark:1,reach:1,reachOut:1};
 const CALM_SKIP={findMe:1,reach:1,reachOut:1};               // Calm mode: fewer prompts
@@ -10276,48 +10506,51 @@ if(window.DeviceMotionEvent){
 let closeSince=0, moveSince=0, closeInfo={sh:0,face:0}, guideStart=0, roundStart=0, lastRealPop=0;
 function isTooClose(){const sh=(ok('lSh')&&ok('rSh'))?Math.abs(P.lSh.x-P.rSh.x)/W:0, face=(ok('lEar')&&ok('rEar'))?Math.abs(P.lEar.x-P.rEar.x)/W:0;
   closeInfo={sh,face};return sh>TOO_CLOSE_SH||face>TOO_CLOSE_FACE}
-function voiceTick(now){voicePump();if(!S.voice||mode!=='camera'||!(state==='calib'||state==='demo'||state==='play')||ending)return;
+function voiceTick(now){voicePump();if(!S.voice||mode!=='camera'||!(state==='calib'||state==='demo'||state==='play'||state==='run')||ending)return;
   const moving=devMotionSeen?phoneMoving:frameMoving;moveSince=moving?(moveSince||now):0;
   const close=isTooClose();closeSince=close?(closeSince||now):0;
   const seenEver=personSeenAt>roundStart, goneFor=seenEver?now-personSeenAt:0;
   // (skip the first 5 s of calibration: the start line already says to put the phone down)
   if(moveSince&&now-moveSince>1500&&!(state==='calib'&&now-guideStart<5000)){say('putDown');return}
-  if(closeSince&&now-closeSince>1500){say('tooClose');return}
-  if(goneFor>3000){say('gone');return}
+  if(state!=='run'&&closeSince&&now-closeSince>1500){say('tooClose');return} // in Run to Yumo, coming close is the game
+  // v6: 'gone' / 'findMe' are silent now (picture hint only)
   if(state==='calib'&&!calibDone&&!seenEver&&now-guideStart>7000){say('findMe');return}
   if(lightOn){say('dark');return}
   if(state==='play'&&now-personSeenAt<1000&&now-lastRealPop>10000)say(seated()?'reachOut':'reach')}
 
 /* ---------- State machine ---------- */
-let state='home', mode='camera', playT=0, ending=false, endT=0, firstHint=true;
-function sheetsOpen(){return !$('settings').classList.contains('hidden')||!$('gate').classList.contains('hidden')}
+let state='home', mode='camera', playT=0, spawnClock=0, ending=false, endT=0, firstHint=true;
+function sheetsOpen(){return !$('settings').classList.contains('hidden')||!$('gate').classList.contains('hidden')||!$('runSetup').classList.contains('hidden')}
 function handsRaised(pts,one){const Q=pts||P,vis=k=>Q[k]&&Q[k].v>VIS;
   if(one){const lift1=Math.min(W,H)*0.08;return !!((vis('lWr')&&vis('lSh')&&Q.lWr.y<Q.lSh.y-lift1)||(vis('rWr')&&vis('rSh')&&Q.rWr.y<Q.rSh.y-lift1))}
   if(!(vis('lWr')&&vis('rWr')&&vis('lSh')&&vis('rSh')))return false;
   const lift=Math.min(W,H)*0.08;return Q.lWr.y<Q.lSh.y-lift&&Q.rWr.y<Q.rSh.y-lift}
 function setState(s){state=s;body.dataset.state=s;if(s!=='play')body.classList.remove('finishing');if(s!=='demo'){body.classList.remove('demo-arm');const a=pip.querySelector('.armR');if(a)a.style.transform=''}
-  $('playBtn').classList.toggle('hidden',s!=='home');$('againBtn').classList.toggle('hidden',s!=='end');$('homeBtn').classList.toggle('hidden',s!=='end');
+  $('playBtn').classList.toggle('hidden',s!=='home');$('runBtn').classList.toggle('hidden',s!=='home');$('againBtn').classList.toggle('hidden',!(s==='end'||s==='runEnd'));$('homeBtn').classList.toggle('hidden',!(s==='end'||s==='runEnd'));
   $('loader').classList.toggle('hidden',s!=='loading');$('hint').classList.toggle('on',false);
   pip.className='';
   if(s==='home'){pip.classList.add('idle-dance');seedAttract();$('finger').classList.add('on');$('finger').style.left='';$('finger').style.top=''}
   else if(s!=='play')$('finger').classList.remove('on');
   if(s==='loading')pip.classList.add('wave');
   if(s==='calib')pip.classList.add('wave','is-happy'); // Happy face for the setup check
-  if(s==='end')pip.classList.add('cheer','is-happy');
-  if(s==='end')BreathRing.show('rest');else BreathRing.hide('rest');
-  if(s==='home'){stopCamera();keepAwake(false);replayHold=0}
+  if(s==='end'||s==='runEnd')pip.classList.add('cheer','is-happy');
+  if(s==='run')pip.classList.add('wave');
+  if(s==='end'||s==='runEnd')BreathRing.show('rest');else BreathRing.hide('rest');
+  if(s==='runEnd'){endAt=performance.now();if(mode==='camera')keepAwake(true);endPlayLog({seconds:R6.t,laps:R6.lap,pops:0,finished:!!R6.finished,mode:mode})}
+  if(s==='home'){endPlayLog({seconds:lastGame==='run'?R6.t:playT,pops:lastGame==='run'?0:popsThisRound,laps:lastGame==='run'?R6.lap:0,finished:false,mode:mode});stopCamera();keepAwake(false);replayHold=0}
   if(s==='end'){endAt=performance.now();replayHold=0;if(mode==='camera')keepAwake(true)}}
-async function startGame(){audio();voiceUnlock();voiceRound();roundStart=performance.now();closeSince=moveSince=0;motionHist=[];prevLuma=null;darkSince=0;brightCount=0;lightLevel=-1;lightHint(false);bubbles=[];parts=[];rings=[];sparkles=[];bursts=[];attract=[];efforts=[];activeT=0;prevHand={};calibHold=0;calibDone=false;ending=false;playT=0;popsThisRound=0;firstHint=true;
+async function startGame(){lastGame='bubbles';autoSeated=false;hipBal=0;hipDecided=false;reachIdx=0;lastPopHand=null;popLog=[];crossPops=0;HV.l.length=0;HV.r.length=0;audio();voiceUnlock();voiceRound();roundStart=performance.now();closeSince=moveSince=0;motionHist=[];prevLuma=null;darkSince=0;brightCount=0;lightLevel=-1;lightHint(false);bubbles=[];parts=[];rings=[];sparkles=[];bursts=[];attract=[];efforts=[];activeT=0;prevHand={};calibHold=0;calibDone=false;ending=false;playT=0;popsThisRound=0;firstHint=true;
   jarFill=0;normalPops=0;specialsSpawned=0;specialCue=0;specialFrom=null;replayHold=0;finishWhy='';clearTimeout(danceTimer);syncJar();body.classList.remove('finishing');
   if(S.useCamera){const already=!!(stream&&stream.active);if(!already)setState('loading');
     try{loadModel();await startCamera();keepAwake(true);
       if(modelPromise)await Promise.race([modelPromise,new Promise((_,j)=>setTimeout(()=>j(new Error('Model load timeout')),45000))]);
-      mode='camera';setState('calib');guideStart=performance.now();say('start');return}
+      mode='camera';guideStart=performance.now();beginPlay();say(seated()?'handsSeated':'hands');return} // v6: straight into play; framing is checked silently
     catch(e){console.info('Using tap mode:',e&&e.message||e);stopCamera()}}
   mode='tap';keepAwake(true);beginPlay()}
-function beginPlay(){setState('play');lastRealPop=performance.now();pip.classList.add(mode==='tap'?'point':'reach');playT=0;spawnTimer=0;lastPopAt=performance.now();
-  for(let i=0;i<2;i++)spawn();
-  if(mode==='tap'){$('finger').classList.add('on')}}
+let framedAt=0, hipBal=0, hipDecided=false;
+function beginPlay(){framedAt=performance.now();setState('play');lastRealPop=performance.now();pip.classList.add(mode==='tap'?'point':'reach');playT=0;spawnClock=0;spawnTimer=0;lastPopAt=performance.now();
+  if(mode==='camera')spawnTimer=1.2;else for(let i=0;i<2;i++)spawn(); // v6: camera play waits ~1 s so seated/standing is known first
+  if(mode==='tap'){$('finger').classList.add('on')};beginPlayLog('Bubble Pop')}
 /* ---------- v2: short picture demo — Pip reaches up and pops a bubble with a glowing hand ---------- */
 /* demoSecs: test-only slow motion for screenshots */ const DEMO_S=parseFloat(qs.get('demoSecs'))||3.0;let demoT=0, demoPopped=false, demoSeen=0, demoBubble=null;
 function beginDemo(){setState('demo');say(seated()?'handsSeated':'hands');demoT=0;demoPopped=false;demoSeen++;body.classList.add('demo-arm');pip.className='';
@@ -10338,7 +10571,7 @@ function finishRound(why){if(ending)return;ending=true;endT=0;finishWhy=why||'ti
   say(finishWhy==='jar'?'jarFull':'bye');finishChime();
   if(finishWhy==='jar'){pipDance('finale');const c=unlockCostume();if(c){costumeChime();
     const r=pip.getBoundingClientRect();for(let i=0;i<(S.calm?4:8);i++)sparkles.push({x:r.left+r.width*(.1+.8*Math.random()),y:r.top+r.height*(.2+.6*Math.random()),vy:20+Math.random()*25,t:0,max:2.6,ph:Math.random()*6,size:12+Math.random()*10,c:['255,94,136','146,98,255','255,206,38','38,166,255'][i%4]})}}
-  else pip.className='cheer is-happy'}
+  else pip.className='cheer is-happy';endPlayLog({seconds:playT,pops:popsThisRound,finished:finishWhy==='jar',mode:mode})}
 
 /* ---------- Main loop (frame-rate independent) ---------- */
 let last=performance.now(), pulse=0;
@@ -10349,8 +10582,9 @@ function frameBody(now){
   const rdt=Math.min(1,Math.max(0,(now-last)/1000)),dt=Math.min(.1,rdt);last=now;pulse+=dt*3/(S.calm?1.6:1);
   ctx.clearRect(0,0,W,H);fpsTrack(now,rdt);
   if(state==='home')attractFrame(dt);
-  if(state==='calib'||state==='demo'||state==='play'||(state==='end'&&mode==='camera'))detect(now);
-  if(state==='calib'||state==='demo'||state==='play')lightCheck(now);else lightHint(false);
+  if(state==='calib'||state==='demo'||state==='play'||state==='run'||(state==='end'&&mode==='camera'))detect(now);
+  if(state==='calib'||state==='demo'||state==='play'||state==='run')lightCheck(now);else lightHint(false);
+  if(state==='run'||state==='runEnd')runFrame(now,rdt,dt);
   if(state==='calib'){const parts3={head:ok('nose'),shoulders:ok('lSh')&&ok('rSh')};const all=parts3.head&&parts3.shoulders;
     if(!calibDone){calibHold=Math.max(0,Math.min(1,calibHold+(all?rdt:-rdt*1.5)));$('hint').classList.toggle('on',!all);
       if(calibHold>=1){calibDone=true;calibDoneAt=now;calibInfo={hips:ok('lHip')&&ok('rHip'),parts:Object.assign({},parts3)};autoSeated=!calibInfo.hips;calibInfo.seated=seated();pip.className='nod is-happy';chime([659.25,987.77],.22);$('hint').classList.remove('on');say('seen')}}
@@ -10359,22 +10593,22 @@ function frameBody(now){
     if(calibDone&&now-calibDoneAt>1600)beginDemo()}
   if(state==='demo')demoFrame(now,rdt);
   if(state==='play'){
-    if(!ending){playT+=rdt;if(playT>=sessionSeconds())finishRound('time')}
-    const hs=mode==='camera'?hands():[];
-    if(mode==='camera'&&ok('nose'))hs.push({x:P.nose.x,y:P.nose.y,r:radius()*.25,head:true});
+    if(!ending){playT+=rdt;spawnClock+=dt;if(playT>=sessionSeconds())finishRound('time')}
+    const hs=mode==='camera'?movingHands(now):[]; // v6: hands only (the head no longer pops), each with a moving flag
     // spawn — pause regular bubbles while a special is announced or on screen
-    if(!ending){spawnTimer-=dt;const max=AMOUNT[S.amount];const busy=specialCue>0||bubbles.some(b=>b.special&&!b.popped);
-      if(!busy&&bubbles.length<max&&spawnTimer<=0){const stuck=now-lastPopAt>9000&&hs.length;spawn(stuck?hs[Math.floor(Math.random()*hs.length)]:null);if(stuck)lastPopAt=now-4000;spawnTimer=(1.1+Math.random()*1.2)/SPEED[S.speed]}}
+    if(!ending){spawnTimer-=dt;const max=mode==='camera'?AMOUNT_REACH[S.amount]:AMOUNT[S.amount];const busy=specialCue>0||bubbles.some(b=>b.special&&!b.popped);
+      if(!busy&&bubbles.length<max&&spawnTimer<=0){spawn(null);spawnTimer=(SPAWN_GAP+Math.random()*1.0)/SPEED[S.speed]}} // v6: calm, steady pace; never spawns under a still hand
     // move + hit; ending: remaining bubbles fade out softly and drift, they do not vanish or speed off
     for(const b of bubbles){b.age+=dt;
       if(ending){b.out=Math.max(0,1-endT/2.4);b.y+=b.vy*dt*.45}else{b.y+=b.vy*dt}
       if(b.seat&&!ending&&b.y<b.topY){b.y+=(b.topY-b.y)*Math.min(1,dt*3);b.hold+=dt;if(b.hold>6)b.out=Math.max(0,1-(b.hold-6)/1.5)}
       if(b.seat&&!ending&&b.age>.3){for(const r of koCache)if(circleHitsRect(b.x,b.y,b.R,r)){const cx=(r.left+r.right)/2,k=Math.min(1,dt*5);b.phx+=(b.x<cx?-1:1)*b.R*1.2*k;b.y+=(Math.min(b.y,r.top-b.R*.25)-b.y)*k}}
       b.ph+=dt*.9;if(b.special&&b.inX!=null)b.phx+=(b.inX-b.phx)*Math.min(1,dt*1.4);b.x=b.phx+Math.sin(b.ph)*b.wob;
-      if(!ending&&b.age>.5){for(const h of hs){const dx=h.x-b.x,dy=h.y-b.y,d=Math.hypot(dx,dy);
-          if(d<b.R+(h.head?b.R*.35:b.R*.45)){popBubble(b);break}
-          if(!h.head&&d<b.R*2.0&&!b.reachAt)b.reachAt=now;
-          if(!h.head&&d<b.R*2.4){b.phx+=dx/d*22*dt;b.y+=dy/d*14*dt}}}
+      if(b.reach&&!ending){b.y=b.baseY+Math.sin(b.ph*1.4)*b.R*.08;if(b.age>b.life)b.out=Math.max(0,1-(b.age-b.life)/1.5)} // reach targets bob in place, then fade softly (no penalty)
+      if(!ending&&b.age>.5&&!(b.out<.6)){for(const h of hs){if(!h.moving)continue;const d=Math.hypot(h.x-b.x,h.y-b.y);
+          if(d<b.R*(1+HIT_PAD)){lastPopHand=h.side;popLog.push({t:Math.round(now),side:h.side,speed:Math.round(h.speed),thr:handInfo.thr,kind:b.kind||(b.special?'special':b.seat?'seat':'rise'),cross:!!(b.crossFor&&b.crossFor===h.side)});
+            if(b.crossFor&&b.crossFor===h.side){crossPops++;effortStar(b.x,b.y,'cross')}popBubble(b);break}
+          if(d<b.R*2.0&&!b.reachAt)b.reachAt=now}}
       if(b.reachAt&&!b.effortDone&&!b.popped&&!ending&&now-b.reachAt>900){b.effortDone=true;effortStar(b.x,b.y,'reach')}}
     bubbles=bubbles.filter(b=>!b.popped&&b.y>-b.R*1.5&&(b.out===undefined||b.out>0));
     for(const b of bubbles)drawBubble(b);
@@ -10383,7 +10617,10 @@ function frameBody(now){
     if(mode==='camera')drawHands(hs.filter(h=>!h.head),pulse);
     if(mode==='tap'&&firstHint&&bubbles[0]){const f=$('finger'),b=bubbles[0];f.style.left=(b.x-20)+'px';f.style.top=(b.y+b.R*.2)+'px'}
     // child left the frame: show the picture hint, no penalty
-    if(mode==='camera')$('hint').classList.toggle('on',!ending&&now-personSeenAt>2500);
+    // v6 silent framing check: the picture hint only shows if head + shoulders have been out of view for 2.5 s
+    if(mode==='camera'){if(ok('nose')&&ok('lSh')&&ok('rSh'))framedAt=now;$('hint').classList.toggle('on',!ending&&now-framedAt>2500)}
+    // Auto seated/standing without a calibration step: hips out of view for 3 s = seated, back in view for 3 s = standing
+    if(mode==='camera'&&S.seat==='auto'&&ok('lSh')&&ok('rSh')){hipBal=Math.max(-3,Math.min(3,hipBal+((ok('lHip')&&ok('rHip'))?rdt:-rdt)));const lim=hipDecided?3:1;if(hipBal<=-lim){autoSeated=true;hipDecided=true}else if(hipBal>=lim){autoSeated=false;hipDecided=true}} // first decision after 1 s, later switches need 3 s
     effortTick(now,rdt);refreshKO(now);
     if(ending){endT+=rdt;if(Math.random()<dt*(S.calm?2:3))sparkles.push({x:W*(.2+Math.random()*.6),y:H*.75,vy:24+Math.random()*24,t:0,max:3.2,ph:Math.random()*6,size:14+Math.random()*10,c:['242,196,168','201,184,218','168,195,160'][Math.floor(Math.random()*3)]});
       if(endT>3.0&&(bubbles.every(b=>(b.out||0)<=.05)||endT>4.2)){setState('end')}}}
@@ -10404,11 +10641,12 @@ cv.addEventListener('pointerdown',e=>{if(state==='home'&&!sheetsOpen()){if(inZon
 
 /* ---------- Buttons ---------- */
 $('playBtn').addEventListener('click',startGame);
-$('againBtn').addEventListener('click',startGame);
+$('againBtn').addEventListener('click',()=>{if(lastGame==='run')startRun();else startGame()});
+$('runBtn').addEventListener('click',openRunSetup);
 $('homeBtn').addEventListener('click',()=>{voiceStop();setState('home')});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(ac)ac.suspend();voiceStop()}else if(ac&&state!=='home')ac.resume()});
 
-/* ---------- Parent gate: press-and-hold 2s, then an adult sum ---------- */
+/* ---------- Parent gate: press-and-hold 2s, then an easy sum (e.g. 14 + 9) ---------- */
 let holdStart=0, holdRAF=0;const ring=document.querySelector('#grownBtn .ringFg');
 function holdTick(){const k=Math.min(1,(performance.now()-holdStart)/2000);ring.style.strokeDashoffset=176*(1-k);if(k>=1){holdEnd();openGate();return}holdRAF=requestAnimationFrame(holdTick)}
 function holdEnd(){cancelAnimationFrame(holdRAF);holdStart=0;ring.style.transition='stroke-dashoffset .4s';ring.style.strokeDashoffset=176;setTimeout(()=>ring.style.transition='',400)}
@@ -10416,7 +10654,7 @@ const gb=$('grownBtn');
 gb.addEventListener('pointerdown',e=>{e.preventDefault();holdStart=performance.now();ring.style.transition='';holdRAF=requestAnimationFrame(holdTick)});
 ['pointerup','pointerleave','pointercancel'].forEach(ev=>gb.addEventListener(ev,()=>{if(holdStart)holdEnd()}));
 gb.addEventListener('contextmenu',e=>e.preventDefault());
-function openGate(){const a=6+Math.floor(Math.random()*4),b=6+Math.floor(Math.random()*4),ans=a*b;$('gateQ').textContent=`What is ${a} × ${b}?`;
+function openGate(){const a=11+Math.floor(Math.random()*9),b=5+Math.floor(Math.random()*5),ans=a+b;$('gateQ').textContent=`What is ${a} + ${b}?`; // v6: easy two-number sum (was a times table)
   const opts=new Set([ans]);while(opts.size<6)opts.add(ans+(Math.floor(Math.random()*21)-10)||ans+11);
   const grid=$('gateGrid');grid.innerHTML='';[...opts].sort(()=>Math.random()-.5).forEach(v=>{const bt=document.createElement('button');bt.textContent=v;
     bt.onclick=()=>{if(v===ans){$('gate').classList.add('hidden');openSettings()}else{$('gate').classList.add('hidden')}};grid.appendChild(bt)});
@@ -10426,7 +10664,7 @@ $('gateCancel').onclick=()=>$('gate').classList.add('hidden');
 /* ---------- Settings UI ---------- */
 function syncUI(){$('vol').value=S.volume;document.querySelectorAll('.seg').forEach(sg=>{sg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',String(S[sg.dataset.key])===b.dataset.v))});
   $('calmT').classList.toggle('on',!!S.calm);$('camT').classList.toggle('on',!!S.useCamera);$('testT').classList.toggle('on',!!S.testView);$('voiceT').classList.toggle('on',!!S.voice);$('specialsT').classList.toggle('on',!!S.specials);$('costumeT').classList.toggle('on',!!S.costumes)}
-function openSettings(){syncUI();$('settings').classList.remove('hidden')}
+function openSettings(){syncUI();renderPlayLog();$('settings').classList.remove('hidden')}
 document.querySelectorAll('.seg').forEach(sg=>sg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S[sg.dataset.key]=b.dataset.v;saveS();syncUI()}));
 $('vol').addEventListener('input',e=>{S.volume=+e.target.value;saveS()});
 $('vol').addEventListener('change',()=>{audio();popSound()});
@@ -10436,7 +10674,82 @@ $('testT').onclick=()=>{S.testView=!S.testView;saveS();syncUI()};
 $('voiceT').onclick=()=>{S.voice=!S.voice;saveS();syncUI();if(!S.voice)voiceStop()};
 $('specialsT').onclick=()=>{S.specials=!S.specials;saveS();syncUI()};
 $('costumeT').onclick=()=>{S.costumes=!S.costumes;saveS();syncUI()};
-$('settingsDone').onclick=()=>$('settings').classList.add('hidden');
+$('settingsDone').onclick=()=>{$('settings').classList.add('hidden');const c=$('playLogConfirm');if(c)c.classList.add('hidden')};
+bindPlayLogUi();
+
+
+/* ---------- v6 prototype: Run to Yumo. The camera guesses near / far from how big the body is in the picture ---------- */
+// Thresholds are shares of the camera frame's long side (shoulder width, or torso length / 1.4). About: far ~2.2-2.8 m, near ~1 m for a young child.
+const RUN_SPACE={small:{far:.115,near:.21},medium:{far:.09,near:.19},big:{far:.07,near:.17}};
+const RUN_DWELL=parseFloat(qs.get('runDwell'))||350, RUN_MIN_LEG=parseFloat(qs.get('runMinLeg'))||1200;
+let lastGame='bubbles';
+const R6={laps:6,lap:0,target:'far',farLit:false,nearLit:false,s:0,raw:[],src:'',inSince:0,legStart:0,lastMeasAt:0,lastSeenAt:0,log:[],finished:false,t:0,lostNear:0,taps:0};
+function runLapsGoal(){const q=parseInt(qs.get('laps'));return q>0?q:Math.max(3,Math.min(10,parseInt(S.runLaps)||6))}
+function runTh(){const d=RUN_SPACE[S.runSpace]||RUN_SPACE.medium,f=parseFloat(qs.get('runFar')),n=parseFloat(qs.get('runNear'));return {far:f>0?f:d.far,near:n>0?n:d.near}}
+// Torso length is used as well as shoulder width, so turning sideways (running away) does not make the child look far.
+function runMeasure(lms,vw,vh){if(!lms)return null;const M=Math.max(vw,vh),g=i=>{const l=lms[i];return l&&(l.v==null||l.v>.5)?l:null};
+  const ls=g(11),rs=g(12),le=g(7),re=g(8),lh=g(23),rh=g(24);let s=0,src='';
+  if(ls&&rs){s=Math.hypot((ls.x-rs.x)*vw,(ls.y-rs.y)*vh)/M;src='shoulders';
+    if(lh&&rh){const tl=Math.hypot((ls.x+rs.x-lh.x-rh.x)/2*vw,(ls.y+rs.y-lh.y-rh.y)/2*vh)/M/1.4;if(tl>s){s=tl;src='torso'}}}
+  else if(le&&re){s=Math.hypot((le.x-re.x)*vw,(le.y-re.y)*vh)/M*2.0;src='face'}
+  return s>0?{s,src}:null}
+// Smoothing: median of the last 5 readings, then an easing step. Hysteresis: far and near are a factor ~2 apart, each must hold for 0.35 s,
+// and they must alternate (far, then near), so jitter around one line can never count a lap.
+function runObserve(m,now){if(!m||R6.finished)return;R6.lastSeenAt=now;R6.raw.push(m.s);if(R6.raw.length>5)R6.raw.shift();
+  const med=R6.raw.slice().sort((a,b)=>a-b)[R6.raw.length>>1];R6.s=R6.s?R6.s+(med-R6.s)*.5:med;R6.src=m.src;R6.lastMeasAt=now;
+  const th=runTh();R6.farNow=R6.s<=th.far;R6.nearNow=R6.s>=th.near;
+  const inZ=R6.target==='far'?R6.farNow:R6.nearNow;
+  if(inZ){if(!R6.inSince)R6.inSince=now;if(now-R6.inSince>=RUN_DWELL){if(R6.target==='far')runReachFar('cam');else runReachNear('cam')}}else R6.inSince=0}
+function runReachFar(how){if(state!=='run'||R6.finished||R6.target!=='far')return;const now=performance.now();
+  R6.target='near';R6.farLit=true;R6.nearLit=false;R6.legStart=now;R6.inSince=0;R6.log.push({t:Math.round(now),ev:'far',how,s:+R6.s.toFixed(3)});
+  const a=audio();if(a)tone(659.25,a.currentTime,.5,S.calm?.08:.12,'sine');say('runNear');pipFace('happy',1200);syncRunHud()}
+function runReachNear(how){if(state!=='run'||R6.finished||R6.target!=='near')return;const now=performance.now();
+  if(how!=='tap'&&now-R6.legStart<RUN_MIN_LEG)return;
+  R6.lap++;R6.target='far';R6.nearLit=true;R6.inSince=0;R6.log.push({t:Math.round(now),ev:'lap',how,lap:R6.lap,s:+R6.s.toFixed(3)});
+  chime([659.25,783.99,1046.5],.14);pipReact();pipDance(R6.lap>=R6.laps?'finale':'wiggle');
+  const r=$('runTrack').getBoundingClientRect(),pt=trackPoint(R6.lap/R6.laps);
+  for(let i=0;i<(S.calm?3:7);i++)sparkles.push({x:r.left+pt.x*r.width/1000+(Math.random()-.5)*40,y:r.top+pt.y*r.height/210+(Math.random()-.5)*30,vy:18+Math.random()*20,t:0,max:2.2,ph:Math.random()*6,size:10+Math.random()*8,c:['255,206,38','255,149,48','38,166,255'][i%3]});
+  syncRunHud();setTimeout(()=>{if(R6.target==='far'){R6.farLit=false;R6.nearLit=false;syncRunHud()}},1300);
+  if(R6.lap>=R6.laps){R6.finished=true;V.queue=[];say('runDone');finishChime();setTimeout(()=>{if(state==='run')setState('runEnd')},2200)}
+  else setTimeout(()=>{if(state==='run'&&!say('runLap'))say('runFar')},400)}
+let TRK=null;
+function trackPoint(k){if(!TRK)return {x:0,y:0};const p=TRK.getPointAtLength(TRK.getTotalLength()*Math.max(0,Math.min(1,k)));return {x:p.x,y:p.y}}
+function buildTrack(){TRK=$('trackBase');const L=TRK.getTotalLength(),g=$('trackStops');g.innerHTML='';const fill=$('trackFill');
+  fill.style.strokeDasharray=L;fill.style.strokeDashoffset=L;
+  for(let i=1;i<=R6.laps;i++){const p=trackPoint(i/R6.laps),last=i===R6.laps;const e=document.createElementNS('http://www.w3.org/2000/svg','g');
+    e.setAttribute('class','stop'+(last?' goal':''));e.setAttribute('transform',`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+    e.innerHTML=last?'<circle r="40" class="disc"/><polygon class="st" points="0,-29 8.5,-9 29.5,-9 12.8,4.1 18.6,25 0,12.4 -18.6,25 -12.8,4.1 -29.5,-9 -8.5,-9"/>'
+      :'<circle r="28" class="disc"/><polygon class="st" points="0,-19 5.6,-5.9 19.4,-5.9 8.3,2.7 12.2,16.1 0,8.2 -12.2,16.1 -8.3,2.7 -19.4,-5.9 -5.6,-5.9"/>';g.appendChild(e)}}
+function syncRunHud(){const L=TRK?TRK.getTotalLength():0,k=R6.lap/R6.laps;$('trackFill').style.strokeDashoffset=L*(1-k);
+  [...$('trackStops').children].forEach((e,i)=>e.classList.toggle('on',i<R6.lap));
+  const p=trackPoint(k);$('runner').setAttribute('transform',`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+  const ff=$('farFlag'),nf=$('nearFlag');ff.classList.toggle('lit',R6.farLit);nf.classList.toggle('lit',R6.nearLit);
+  ff.classList.toggle('next',!R6.finished&&R6.target==='far');nf.classList.toggle('next',!R6.finished&&R6.target==='near')}
+function runFrame(now,rdt,dt){if(state==='runEnd'){if(Math.random()<dt*(S.calm?1.2:2.5))sparkles.push({x:W*(.15+Math.random()*.7),y:H*.62,vy:25+Math.random()*25,t:0,max:3.5,ph:Math.random()*6,size:12+Math.random()*10,c:['242,196,168','201,184,218','168,195,160'][Math.floor(Math.random()*3)]});return}
+  R6.t+=rdt;const th=runTh();
+  // child ran so close that the camera lost the body: count it as near (only on the way back, after a real far)
+  if(mode==='camera'&&R6.target==='near'&&!R6.finished&&R6.s>=th.near*.75&&now-R6.lastSeenAt>500&&now-R6.lastSeenAt<1500&&now-R6.legStart>=RUN_MIN_LEG){R6.lostNear++;runReachNear('lost')}
+  if(mode==='camera'){$('hint').classList.toggle('on',!R6.finished&&now-personSeenAt>2500);drawCostume(dt,now)}
+  const tapme=mode==='tap'||now-personSeenAt>6000;$('farFlag').classList.toggle('tapme',tapme&&R6.target==='far');$('nearFlag').classList.toggle('tapme',tapme&&R6.target==='near');
+  const fresh=mode==='camera'&&now-R6.lastMeasAt<800&&R6.s>0;const dot=$('runDot');dot.style.opacity=fresh?1:0;
+  if(fresh){const k=(Math.log(R6.s)-Math.log(th.far))/(Math.log(th.near)-Math.log(th.far));dot.style.left=(5+90*Math.max(0,Math.min(1,k))).toFixed(1)+'%'}}
+function openRunSetup(){if(state!=='home')return;audio();$('runSetup').classList.remove('hidden')}
+function closeRunSetup(){$('runSetup').classList.add('hidden')}
+async function startRun(){closeRunSetup();lastGame='run';audio();voiceUnlock();voiceRound();
+  Object.assign(R6,{laps:runLapsGoal(),lap:0,target:'far',farLit:false,nearLit:false,s:0,raw:[],src:'',inSince:0,legStart:0,lastMeasAt:0,lastSeenAt:0,log:[],finished:false,t:0,lostNear:0,taps:0});
+  bubbles=[];parts=[];rings=[];sparkles=[];bursts=[];attract=[];efforts=[];ending=false;roundStart=performance.now();closeSince=moveSince=0;lightHint(false);
+  buildTrack();syncRunHud();
+  if(S.useCamera){const already=!!(stream&&stream.active);if(!already)setState('loading');
+    try{loadModel();await startCamera();keepAwake(true);
+      if(modelPromise)await Promise.race([modelPromise,new Promise((_,j)=>setTimeout(()=>j(new Error('Model load timeout')),45000))]);
+      mode='camera';setState('run');syncRunHud();beginPlayLog('Run to Yumo');say('runFar');return}
+    catch(e){console.info('Run to Yumo: using taps:',e&&e.message||e);stopCamera()}}
+  mode='tap';keepAwake(true);setState('run');syncRunHud();beginPlayLog('Run to Yumo');say('runFar')}
+$('runStart').addEventListener('click',startRun);
+$('runBack').addEventListener('click',closeRunSetup);
+// finger fallback (and always allowed): tap the far flag, then the near flag
+$('farFlag').addEventListener('click',()=>{R6.taps++;runReachFar('tap')});
+$('nearFlag').addEventListener('click',()=>{R6.taps++;runReachNear('tap')});
 
 /* ---------- Optional parallax background layers (embedded by bg_layers.py; code-drawn sky is the fallback) ---------- */
 let PLX=[],BGC=null;
@@ -10463,7 +10776,8 @@ applyS();setState('home');
 if(S.useCamera)setTimeout(()=>{loadModel().catch(()=>{})},600);
 window.__pip={get state(){return state},get mode(){return mode},get bubbles(){return bubbles},get pops(){return popsThisRound},get modelState(){return modelState},get ending(){return ending},get light(){return lightLevel},get lightHint(){return lightOn},get demoT(){return demoT},get demoSeen(){return demoSeen},get calibInfo(){return calibInfo},voice:V,get closeInfo(){return closeInfo},get frameMoving(){return frameMoving},get motionFrac(){return motionFrac},get phoneMoving(){return phoneMoving},LINES,get delegate(){return delegate},get fps(){return detTimes.length},get raw(){return lastRaw},toScreen,camLayout,P,get jarFill(){return jarFill},get jarGoal(){return JAR_GOAL},get specialCue(){return specialCue},get normalPops(){return normalPops},get specials(){return !!S.specials},get finishWhy(){return finishWhy},get endT(){return endT},handsRaised,pipDance,finishChime,
   get attract(){return attract},get parts(){return parts},get bursts(){return bursts},get pipReacts(){return pipReacts},get lastPopSnd(){return lastPopSnd},get costume(){return wearing()},get costumes(){return JSON.parse(JSON.stringify(C))},get costumeDrawn(){return costumeDrawn},CA,follow,get calm(){return !!S.calm},get settings(){return JSON.parse(JSON.stringify(S))},get frameTimes(){return FT.slice()},hues,unlockCostume,popSound,burstFx,safeZones,pipFace,get face(){return pip.dataset.face},
-  BreathRing,setPose,seatZone,get seated(){return seated()},get autoSeated(){return autoSeated},effortStar,get effortStars(){return effortStars},get efforts(){return efforts},get activeT(){return activeT},keepOuts,get parallax(){return PLX.map(l=>({name:l.name,dx:l.dx,dy:l.dy}))}};
+  BreathRing,setPose,seatZone,get seated(){return seated()},get autoSeated(){return autoSeated},effortStar,get effortStars(){return effortStars},get efforts(){return efforts},get activeT(){return activeT},keepOuts,get parallax(){return PLX.map(l=>({name:l.name,dx:l.dx,dy:l.dy}))},
+  get popLog(){return popLog},get handInfo(){return handInfo},get reachLog(){return reachLog},get crossPops(){return crossPops},HV,setRaw,run:R6,runMeasure,runTh,startRun,openRunSetup,get lastGame(){return lastGame},get autoSeatedNow(){return autoSeated},get framedAt(){return framedAt},get playT(){return playT},get spawnClock(){return spawnClock},get spawnGap(){return SPAWN_GAP},get appVersion(){return APP_VERSION},get playLog(){return loadPlayLog()},beginPlayLog,endPlayLog,renderPlayLog};
 })();
 </script>
 </body>
